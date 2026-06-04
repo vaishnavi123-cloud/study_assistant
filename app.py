@@ -21,7 +21,7 @@ metadata_file = "document_metadata.txt"
 if os.path.exists(vector_db_path) and os.path.exists(metadata_file):
     with open(metadata_file, "r") as f:
         doc_name = f.read().strip()
-    st.success(f"📄 Document '{doc_name}' already loaded and processed!")
+    st.success(f"📄 Document about vector algebra is already loaded and processed!")
     pdf_loaded = True
     if st.button("Upload a new document"):
         shutil.rmtree(vector_db_path)
