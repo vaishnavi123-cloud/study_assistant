@@ -5,6 +5,40 @@ from langchain_openai import ChatOpenAI
 from langchain_ollama import OllamaLLM
 
 
+def _read_streamlit_secret(*keys):
+    try:
+        import streamlit as st
+    except Exception:
+        return None
+
+    for key in keys:
+        try:
+            value = st.secrets.get(key)
+        except Exception:
+            value = None
+        if value:
+            return str(value)
+
+    try:
+        openai_block = st.secrets.get("openai")
+    except Exception:
+        openai_block = None
+    if openai_block and isinstance(openai_block, dict):
+        for key in keys:
+            leaf = key.lower().replace("openai_", "")
+            value = openai_block.get(leaf)
+            if value:
+                return str(value)
+    return None
+
+
+def _get_setting(primary_key: str, *aliases: str):
+    value = os.getenv(primary_key)
+    if value:
+        return value
+    return _read_streamlit_secret(primary_key, *aliases)
+
+
 def _normalize_base_url(base_url: str) -> str:
     return base_url.rstrip("/")
 
@@ -37,23 +71,26 @@ def check_ollama_connection(base_url: str, model_name: str) -> None:
 
 
 def _get_openai_llm():
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = _get_setting("OPENAI_API_KEY", "openai_api_key", "OPENAI_KEY")
     if not api_key:
         raise RuntimeError(
             "Ollama is unavailable and OPENAI_API_KEY is not configured."
         )
 
-    model_name = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    model_name = _get_setting("OPENAI_MODEL", "openai_model") or "gpt-4o-mini"
     return ChatOpenAI(model=model_name, api_key=api_key), "openai"
 
 
 def get_llm():
-    model_name = os.getenv("OLLAMA_MODEL", "phi3")
+    model_name = _get_setting("OLLAMA_MODEL", "ollama_model") or "phi3"
     base_url = _normalize_base_url(
-        os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+        _get_setting("OLLAMA_BASE_URL", "ollama_base_url")
+        or "http://127.0.0.1:11434"
     )
 
-    prefer_provider = os.getenv("LLM_PROVIDER", "auto").strip().lower()
+    prefer_provider = (
+        _get_setting("LLM_PROVIDER", "llm_provider") or "auto"
+    ).strip().lower()
 
     if prefer_provider == "openai":
         return _get_openai_llm()

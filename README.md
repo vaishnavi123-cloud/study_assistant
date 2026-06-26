@@ -211,6 +211,16 @@ OPENAI_MODEL = "gpt-4o-mini"
 LLM_PROVIDER = "auto"
 ```
 
+Alternative supported format:
+
+```toml
+[openai]
+api_key = "your_key"
+model = "gpt-4o-mini"
+
+LLM_PROVIDER = "auto"
+```
+
 If you still want Ollama in cloud, you must provide a real public endpoint in:
 
 - `OLLAMA_BASE_URL=https://<reachable-host>`
