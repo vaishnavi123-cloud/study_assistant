@@ -1,8 +1,10 @@
 streamlit
 langchain
+langchain-text-splitters
 langchain-community
 langchain-ollama
 langchain-huggingface
 faiss-cpu
 pypdf
 sentence-transformers
+httpx

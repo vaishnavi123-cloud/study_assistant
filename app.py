@@ -61,12 +61,21 @@ if pdf_loaded:
         "Ask a question from your PDF"
     )
     if question:
-        db = load_vector_store()
-        docs = db.similarity_search(
-            question,
-            k=2
-        )
-        llm = get_llm()
+        try:
+            db = load_vector_store()
+            docs = db.similarity_search(
+                question,
+                k=2
+            )
+            llm = get_llm()
+        except Exception as exc:
+            st.error(
+                "Unable to initialize retrieval/LLM. "
+                "If you are on Streamlit Cloud, set OLLAMA_BASE_URL to a reachable "
+                "Ollama server and confirm the model exists."
+            )
+            st.exception(exc)
+            st.stop()
 
         context = "\n".join(
             [doc.page_content for doc in docs]
@@ -82,6 +91,15 @@ Question:
 {question}
 """
 
-        response = llm.invoke(prompt)
+        try:
+            response = llm.invoke(prompt)
+        except Exception as exc:
+            st.error(
+                "The model request failed. Verify OLLAMA_BASE_URL, network access, "
+                "and that OLLAMA_MODEL is pulled on the Ollama server."
+            )
+            st.exception(exc)
+            st.stop()
+
         st.subheader("Answer")
         st.write(response)
