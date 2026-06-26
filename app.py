@@ -16,10 +16,32 @@ st.set_page_config(
 st.title("📚 AI Study Assistant using RAG + Ollama")
 
 
+def _load_llm_settings_from_secrets():
+    # Streamlit Cloud secrets are not always available as process env vars.
+    for key in [
+        "LLM_PROVIDER",
+        "OPENAI_API_KEY",
+        "OPENAI_MODEL",
+        "OLLAMA_BASE_URL",
+        "OLLAMA_MODEL",
+    ]:
+        if os.getenv(key):
+            continue
+        try:
+            value = st.secrets.get(key)
+        except Exception:
+            value = None
+        if value:
+            os.environ[key] = str(value)
+
+
 def _extract_response_text(response):
     if hasattr(response, "content"):
         return response.content
     return str(response)
+
+
+_load_llm_settings_from_secrets()
 
 # Check if vector store exists
 vector_db_path = "vector_db"
@@ -79,6 +101,12 @@ if pdf_loaded:
                 "Unable to initialize retrieval/LLM. "
                 "For cloud deployments, set OPENAI_API_KEY (and optional OPENAI_MODEL) "
                 "or configure a reachable OLLAMA_BASE_URL."
+            )
+            st.info(
+                "If you are using Streamlit Cloud, add these in App Settings > Secrets:\n"
+                "OPENAI_API_KEY=your_key\n"
+                "OPENAI_MODEL=gpt-4o-mini\n"
+                "LLM_PROVIDER=auto"
             )
             st.exception(exc)
             st.stop()

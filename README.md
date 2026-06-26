@@ -203,6 +203,14 @@ For Streamlit Cloud, the simplest setup is OpenAI:
 - `OPENAI_API_KEY=<your_key>`
 - `OPENAI_MODEL=gpt-4o-mini` (optional; default is `gpt-4o-mini`)
 
+In Streamlit Cloud, set these in App Settings -> Secrets:
+
+```toml
+OPENAI_API_KEY = "your_key"
+OPENAI_MODEL = "gpt-4o-mini"
+LLM_PROVIDER = "auto"
+```
+
 If you still want Ollama in cloud, you must provide a real public endpoint in:
 
 - `OLLAMA_BASE_URL=https://<reachable-host>`
