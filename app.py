@@ -19,9 +19,6 @@ st.title("📚 AI Study Assistant using RAG + Ollama")
 def _load_llm_settings_from_secrets():
     # Streamlit Cloud secrets are not always available as process env vars.
     for key in [
-        "LLM_PROVIDER",
-        "OPENAI_API_KEY",
-        "OPENAI_MODEL",
         "OLLAMA_BASE_URL",
         "OLLAMA_MODEL",
     ]:
@@ -99,14 +96,12 @@ if pdf_loaded:
         except Exception as exc:
             st.error(
                 "Unable to initialize retrieval/LLM. "
-                "For cloud deployments, set OPENAI_API_KEY (and optional OPENAI_MODEL) "
-                "or configure a reachable OLLAMA_BASE_URL."
+                "Configure a reachable OLLAMA_BASE_URL and existing OLLAMA_MODEL."
             )
             st.info(
                 "If you are using Streamlit Cloud, add these in App Settings > Secrets:\n"
-                "OPENAI_API_KEY=your_key\n"
-                "OPENAI_MODEL=gpt-4o-mini\n"
-                "LLM_PROVIDER=auto"
+                "OLLAMA_BASE_URL=https://your-ollama-host\n"
+                "OLLAMA_MODEL=phi3"
             )
             st.exception(exc)
             st.stop()
@@ -132,7 +127,7 @@ Question:
         except Exception as exc:
             st.error(
                 "The model request failed. Check your provider configuration "
-                "(OLLAMA_BASE_URL/OLLAMA_MODEL or OPENAI_API_KEY/OPENAI_MODEL)."
+                "(OLLAMA_BASE_URL/OLLAMA_MODEL)."
             )
             st.exception(exc)
             st.stop()

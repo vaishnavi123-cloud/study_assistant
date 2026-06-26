@@ -190,41 +190,21 @@ Examples:
 
 If Ollama is unreachable or the model is missing, the UI now shows an actionable error instead of crashing with a traceback.
 
-## Cloud Fallback (Recommended)
+## Privacy-First Ollama Only Mode
 
-The app now supports provider fallback:
+This app now runs in strict Ollama-only mode (no external model API keys).
 
-- `LLM_PROVIDER=auto` (default): try Ollama first, then fallback to OpenAI if configured.
-- `LLM_PROVIDER=ollama`: use only Ollama.
-- `LLM_PROVIDER=openai`: use only OpenAI.
+For Streamlit Cloud, you must provide a real public Ollama endpoint:
 
-For Streamlit Cloud, the simplest setup is OpenAI:
-
-- `OPENAI_API_KEY=<your_key>`
-- `OPENAI_MODEL=gpt-4o-mini` (optional; default is `gpt-4o-mini`)
+- `OLLAMA_BASE_URL=https://<reachable-host>`
+- `OLLAMA_MODEL=phi3`
 
 In Streamlit Cloud, set these in App Settings -> Secrets:
 
 ```toml
-OPENAI_API_KEY = "your_key"
-OPENAI_MODEL = "gpt-4o-mini"
-LLM_PROVIDER = "auto"
+OLLAMA_BASE_URL = "https://your-ollama-host"
+OLLAMA_MODEL = "phi3"
 ```
-
-Alternative supported format:
-
-```toml
-[openai]
-api_key = "your_key"
-model = "gpt-4o-mini"
-
-LLM_PROVIDER = "auto"
-```
-
-If you still want Ollama in cloud, you must provide a real public endpoint in:
-
-- `OLLAMA_BASE_URL=https://<reachable-host>`
-- `OLLAMA_MODEL=phi3`
 
 ## Immediate Action Items
 
@@ -332,17 +312,9 @@ Reason:
 - They do not provide a persistent local Ollama runtime in the way this app expects.
 - Local FAISS files may not persist reliably across restarts.
 
-### If You Want Cloud Hosting Without Ollama on the Server
+### Privacy Note
 
-You should replace `OllamaLLM(model="phi3")` with a hosted model API, for example:
-
-- OpenAI
-- Azure OpenAI
-- Groq
-- Together AI
-- Hugging Face Inference
-
-After that change, the app becomes much easier to deploy on managed platforms because inference no longer depends on a local model server.
+Since this app uses Ollama only, document content stays within your own infrastructure (your local machine or your own server running Ollama).
 
 ### Minimum Production Checklist
 
