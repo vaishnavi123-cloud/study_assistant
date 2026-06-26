@@ -15,6 +15,12 @@ st.set_page_config(
 )
 st.title("📚 AI Study Assistant using RAG + Ollama")
 
+
+def _extract_response_text(response):
+    if hasattr(response, "content"):
+        return response.content
+    return str(response)
+
 # Check if vector store exists
 vector_db_path = "vector_db"
 metadata_file = "document_metadata.txt"
@@ -67,15 +73,17 @@ if pdf_loaded:
                 question,
                 k=2
             )
-            llm = get_llm()
+            llm, provider = get_llm()
         except Exception as exc:
             st.error(
                 "Unable to initialize retrieval/LLM. "
-                "If you are on Streamlit Cloud, set OLLAMA_BASE_URL to a reachable "
-                "Ollama server and confirm the model exists."
+                "For cloud deployments, set OPENAI_API_KEY (and optional OPENAI_MODEL) "
+                "or configure a reachable OLLAMA_BASE_URL."
             )
             st.exception(exc)
             st.stop()
+
+        st.caption(f"Provider: {provider}")
 
         context = "\n".join(
             [doc.page_content for doc in docs]
@@ -95,11 +103,11 @@ Question:
             response = llm.invoke(prompt)
         except Exception as exc:
             st.error(
-                "The model request failed. Verify OLLAMA_BASE_URL, network access, "
-                "and that OLLAMA_MODEL is pulled on the Ollama server."
+                "The model request failed. Check your provider configuration "
+                "(OLLAMA_BASE_URL/OLLAMA_MODEL or OPENAI_API_KEY/OPENAI_MODEL)."
             )
             st.exception(exc)
             st.stop()
 
         st.subheader("Answer")
-        st.write(response)
+        st.write(_extract_response_text(response))

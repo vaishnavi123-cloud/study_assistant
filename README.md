@@ -190,6 +190,24 @@ Examples:
 
 If Ollama is unreachable or the model is missing, the UI now shows an actionable error instead of crashing with a traceback.
 
+## Cloud Fallback (Recommended)
+
+The app now supports provider fallback:
+
+- `LLM_PROVIDER=auto` (default): try Ollama first, then fallback to OpenAI if configured.
+- `LLM_PROVIDER=ollama`: use only Ollama.
+- `LLM_PROVIDER=openai`: use only OpenAI.
+
+For Streamlit Cloud, the simplest setup is OpenAI:
+
+- `OPENAI_API_KEY=<your_key>`
+- `OPENAI_MODEL=gpt-4o-mini` (optional; default is `gpt-4o-mini`)
+
+If you still want Ollama in cloud, you must provide a real public endpoint in:
+
+- `OLLAMA_BASE_URL=https://<reachable-host>`
+- `OLLAMA_MODEL=phi3`
+
 ## Immediate Action Items
 
 - Add `langchain-text-splitters` in `requirements.txt`.

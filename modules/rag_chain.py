@@ -1,6 +1,7 @@
 import os
 
 import httpx
+from langchain_openai import ChatOpenAI
 from langchain_ollama import OllamaLLM
 
 
@@ -35,15 +36,38 @@ def check_ollama_connection(base_url: str, model_name: str) -> None:
         )
 
 
-def get_llm() -> OllamaLLM:
+def _get_openai_llm():
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "Ollama is unavailable and OPENAI_API_KEY is not configured."
+        )
+
+    model_name = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    return ChatOpenAI(model=model_name, api_key=api_key), "openai"
+
+
+def get_llm():
     model_name = os.getenv("OLLAMA_MODEL", "phi3")
     base_url = _normalize_base_url(
         os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
     )
 
-    check_ollama_connection(base_url, model_name)
+    prefer_provider = os.getenv("LLM_PROVIDER", "auto").strip().lower()
 
-    return OllamaLLM(
-        model=model_name,
-        base_url=base_url,
-    )
+    if prefer_provider == "openai":
+        return _get_openai_llm()
+
+    try:
+        check_ollama_connection(base_url, model_name)
+        return (
+            OllamaLLM(
+                model=model_name,
+                base_url=base_url,
+            ),
+            "ollama",
+        )
+    except Exception:
+        if prefer_provider == "ollama":
+            raise
+        return _get_openai_llm()
